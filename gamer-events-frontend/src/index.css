@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #000428; /* Fondo constante */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #000428; /* Fondo constante */
+}
+
+.bg-gradient {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.bg-gradient::before,
+.bg-gradient::after {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(45deg, #ff80b5, #9089fc, #1f1c2c);
+  opacity: 0.75;
+  border-radius: 50%;
+  animation: move 10s ease-in-out infinite alternate;
+  z-index: 0; /* Asegúrate de que estos estén detrás */
+}
+
+.bg-gradient::before {
+  top: 10%;
+  left: 30%;
+}
+
+.bg-gradient::after {
+  bottom: 20%;
+  right: 30%;
+  width: 300px;
+  height: 300px;
+  animation-delay: 5s;
+}
+
+section {
+  position: relative;
+  z-index: 1; /* Eleva el contenido de la sección por encima de los elementos pseudo */
+}
+
+section::before,
+section::after {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(45deg, #ff80b5, #9089fc, #1f1c2c);
+  opacity: 0.75;
+  border-radius: 50%;
+  animation: move 10s ease-in-out infinite alternate;
+  z-index: 0; /* Asegúrate de que estos estén detrás */
+}
+
+section::before {
+  top: 10%;
+  left: 30%;
+}
+
+section::after {
+  bottom: 20%;
+  right: 30%;
+  width: 300px;
+  height: 300px;
+  animation-delay: 5s;
+}
+
+section:nth-child(odd)::before {
+  top: 20%;
+  left: 10%;
+  width: 250px;
+  height: 250px;
+  animation-duration: 15s;
+}
+
+section:nth-child(odd)::after {
+  bottom: 30%;
+  right: 10%;
+  width: 350px;
+  height: 350px;
+  animation-duration: 20s;
+}
+
+@keyframes move {
+  0% {
+    transform: translateX(0) translateY(0) scale(1);
+  }
+  50% {
+    transform: translateX(30px) translateY(-30px) scale(1.2);
+  }
+  100% {
+    transform: translateX(-30px) translateY(30px) scale(1);
+  }
+}
+
+.section-content {
+  position: relative; /* Asegúrate de que esto se eleva por encima de los elementos pseudo */
+  z-index: 1; /* Asegúrate de que esto se eleva por encima de los elementos pseudo */
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+}
+
+.section-content.visible {
+  opacity: 1;
+}
+
+.content {
+  position: relative;
+  z-index: 1; /* Eleva el contenido por encima del fondo */
+}
