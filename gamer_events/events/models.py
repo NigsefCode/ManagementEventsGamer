@@ -22,9 +22,13 @@ class Event(models.Model):
     registration_deadline = models.DateTimeField()
 
 class Team(models.Model):
-    name = models.CharField(max_length=100)
-    members = models.ManyToManyField(User)
+    name = models.CharField(max_length=255)
+    creator = models.ForeignKey(User, related_name='created_teams', on_delete=models.CASCADE)
+    members = models.ManyToManyField(User, related_name='teams')
 
+    def __str__(self):
+        return self.name
+    
 class Participation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)

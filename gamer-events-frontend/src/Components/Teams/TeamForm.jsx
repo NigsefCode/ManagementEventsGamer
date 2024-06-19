@@ -45,6 +45,7 @@ const TeamForm = ({ team, onTeamCreated }) => {
             const dataToSend = {
                 name: formData.name,
                 member_ids: memberIds,
+                creator: localStorage.getItem('user_id') // Obtén el ID del usuario autenticado
             };
             if (team && team.id) {
                 await axiosInstance.put(`teams/${team.id}/`, dataToSend);

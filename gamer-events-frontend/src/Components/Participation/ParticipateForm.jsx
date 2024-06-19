@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../Axios/Axios';
 
-const ParticipationForm = ({ event, onParticipationCreated }) => {
+const ParticipateForm = ({ event, onParticipationCreated }) => {
     const [teams, setTeams] = useState([]);
     const [selectedTeamId, setSelectedTeamId] = useState('');
     const userId = localStorage.getItem('user_id'); // Obtén el ID del usuario autenticado
@@ -9,7 +9,7 @@ const ParticipationForm = ({ event, onParticipationCreated }) => {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const response = await axiosInstance.get('teams/');
+                const response = await axiosInstance.get('teams/my_teams/');
                 setTeams(response.data);
             } catch (error) {
                 console.error('Error fetching teams:', error);
@@ -17,7 +17,7 @@ const ParticipationForm = ({ event, onParticipationCreated }) => {
         };
 
         fetchTeams();
-    }, []);
+    }, [userId]);
 
     const handleTeamChange = (e) => {
         setSelectedTeamId(e.target.value);
@@ -86,4 +86,4 @@ const ParticipationForm = ({ event, onParticipationCreated }) => {
     );
 };
 
-export default ParticipationForm;
+export default ParticipateForm;

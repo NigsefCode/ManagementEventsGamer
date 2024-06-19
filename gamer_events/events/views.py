@@ -59,7 +59,7 @@ class CategoryViewSet(ModelViewSet):
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -139,16 +139,20 @@ class TeamViewSet(viewsets.ModelViewSet):
     """
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
+    permission_classes = [IsAuthenticated]
 
+    def perform_create(self, serializer):
+        serializer.save(creator=self.request.user)
+        
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def my_teams(self, request):
         """
-        Returns the teams that the logged-in user is a member of.
+        Returns the teams that the logged-in user created.
         """
-        teams = Team.objects.filter(members=request.user.id)
+        teams = Team.objects.filter(creator=request.user)
         serializer = self.get_serializer(teams, many=True)
         return Response(serializer.data)
-
+    
 class ParticipateEventView(generics.CreateAPIView):
     queryset = Participation.objects.all()
     serializer_class = ParticipationSerializer

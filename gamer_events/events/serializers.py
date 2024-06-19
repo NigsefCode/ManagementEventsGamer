@@ -57,7 +57,7 @@ class TeamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Team
-        fields = ['id', 'name', 'members', 'member_ids']
+        fields = ['id', 'name', 'creator', 'members', 'member_ids']
 
 class ParticipationSerializer(serializers.ModelSerializer):
     event = EventSerializer(read_only=True)
