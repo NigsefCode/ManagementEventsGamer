@@ -90,6 +90,9 @@ DATABASES = {
     }
 }
 
+MONGODB_URI = 'mongodb://localhost:27017/'
+MONGODB_NAME = 'gamer_events_db'
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',

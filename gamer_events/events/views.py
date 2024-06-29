@@ -8,7 +8,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from bson import ObjectId
 from rest_framework.viewsets import ModelViewSet
-
+from django.shortcuts import render
+from djongo.models import Count
+from pymongo import MongoClient
+from bson import ObjectId
+from django.conf import settings
 
 class UserViewSet(ModelViewSet):
     """
@@ -128,8 +132,8 @@ class EventViewSet(viewsets.ModelViewSet):
         Allows a user to delete an event only if they are the creator.
         """
         instance = self.get_object()
-        if instance.creator != request.user.id:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        if instance.creator != request.user:
+            return Response({'error': 'You do not have permission to delete this event.'}, status=status.HTTP_403_FORBIDDEN)
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
     
@@ -206,3 +210,87 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def popular_events(request):
+    try:
+        client = MongoClient(settings.MONGODB_URI)
+        db = client[settings.MONGODB_NAME]
+        events_collection = db['events_event']
+
+        pipeline = [
+            {
+                "$lookup": {
+                    "from": "events_participation",
+                    "localField": "id",
+                    "foreignField": "event_id",
+                    "as": "participations"
+                }
+            },
+            {
+                "$addFields": {
+                    "participants_count": {"$size": "$participations"}
+                }
+            },
+            {
+                "$sort": {"participants_count": -1}
+            },
+            {
+                "$limit": 10
+            },
+            {
+                "$project": {
+                    "name": 1,
+                    "participants_count": 1
+                }
+            }
+        ]
+
+        popular_events = list(events_collection.aggregate(pipeline))
+
+        # Convertir ObjectId a string
+        for event in popular_events:
+            event['_id'] = str(event['_id'])
+
+
+        return Response(popular_events)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_roles_distribution(request):
+    pipeline = [
+        {
+            "$group": {
+                "id": {
+                    "is_superuser": "$is_superuser",
+                    "is_staff": "$is_staff"
+                },
+                "count": {"$sum": 1}
+            }
+        },
+        {
+            "$project": {
+                "role": {
+                    "$cond": {
+                        "if": {"$eq": ["$_id.is_superuser", True]},
+                        "then": "Admin",
+                        "else": {
+                            "$cond": {
+                                "if": {"$eq": ["$_id.is_staff", True]},
+                                "then": "Staff",
+                                "else": "User"
+                            }
+                        }
+                    }
+                },
+                "count": 1
+            }
+        }
+    ]
+
+    distribution = list(User.objects.aggregate(*pipeline))
+    return Response(distribution)
+

@@ -21,4 +21,8 @@ urlpatterns = [
     path('participate/', ParticipateEventView.as_view(), name='participate_event'),
     path('my-participations/', UserParticipationListView.as_view(), name='user_participations'),
     path('participate/<int:pk>/', ParticipateEventDeleteView.as_view(), name='participate-delete'),
+
+    # Rutas a las integraciones con Pipeline en MongoDB
+    path('popular-events/', popular_events, name='popular-events'),
+    path('user-roles-distribution/', user_roles_distribution, name='user-roles-distribution'),
 ]
