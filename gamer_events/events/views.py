@@ -13,6 +13,7 @@ from djongo.models import Count
 from pymongo import MongoClient
 from bson import ObjectId
 from django.conf import settings
+from django.http import JsonResponse
 
 class UserViewSet(ModelViewSet):
     """
@@ -261,36 +262,55 @@ def popular_events(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_roles_distribution(request):
-    pipeline = [
-        {
-            "$group": {
-                "id": {
-                    "is_superuser": "$is_superuser",
-                    "is_staff": "$is_staff"
-                },
-                "count": {"$sum": 1}
-            }
-        },
-        {
-            "$project": {
-                "role": {
-                    "$cond": {
-                        "if": {"$eq": ["$_id.is_superuser", True]},
-                        "then": "Admin",
-                        "else": {
-                            "$cond": {
-                                "if": {"$eq": ["$_id.is_staff", True]},
-                                "then": "Staff",
-                                "else": "User"
+    try:
+        # Conectar a la base de datos MongoDB
+        client = MongoClient(settings.MONGODB_URI)
+        db = client[settings.MONGODB_NAME]
+        users_collection = db['events_user']
+
+        # Definir el pipeline de agregación para contar roles
+        role_distribution_pipeline = [
+            {
+                "$group": {
+                    "_id": {
+                        "is_superuser": "$is_superuser",
+                        "is_staff": "$is_staff"
+                    },
+                    "count": {"$sum": 1}
+                }
+            },
+            {
+                "$project": {
+                    "role": {
+                        "$cond": {
+                            "if": {"$eq": ["$_id.is_superuser", True]},
+                            "then": "Admin",
+                            "else": {
+                                "$cond": {
+                                    "if": {"$eq": ["$_id.is_staff", True]},
+                                    "then": "Staff",
+                                    "else": "User"
+                                }
                             }
                         }
-                    }
-                },
-                "count": 1
+                    },
+                    "count": 1
+                }
             }
+        ]
+
+        # Ejecutar el pipeline de agregación
+        role_distribution = list(users_collection.aggregate(role_distribution_pipeline))
+
+        # Calcular el total de usuarios
+        total_users = sum(role['count'] for role in role_distribution)
+
+        # Estructurar la respuesta
+        response_data = {
+            "total_users": total_users,
+            "roles": role_distribution
         }
-    ]
 
-    distribution = list(User.objects.aggregate(*pipeline))
-    return Response(distribution)
-
+        return JsonResponse(response_data, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

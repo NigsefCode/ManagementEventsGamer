@@ -6,6 +6,7 @@ const UserList = () => {
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
     const [showForm, setShowForm] = useState(false);
+    const [roleDistribution, setRoleDistribution] = useState(null);
 
     useEffect(() => {
         fetchUsers();
@@ -17,6 +18,15 @@ const UserList = () => {
             setUsers(response.data);
         } catch (error) {
             console.error('Error fetching users:', error);
+        }
+    };
+
+    const fetchRoleDistribution = async () => {
+        try {
+            const response = await axiosInstance.get('user-roles-distribution/');
+            setRoleDistribution(response.data);
+        } catch (error) {
+            console.error('Error fetching role distribution:', error);
         }
     };
 
@@ -55,6 +65,12 @@ const UserList = () => {
                     >
                         Crear Usuario
                     </button>
+                    <button
+                        onClick={fetchRoleDistribution}
+                        className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md mb-4"
+                    >
+                        Ver Distribución de Roles
+                    </button>
                 </div>
                 <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
                     {users.map(user => (
@@ -78,6 +94,19 @@ const UserList = () => {
                 </ul>
                 {showForm && (
                     <UserForm user={selectedUser} onUserCreatedOrUpdated={handleUserCreatedOrUpdated} />
+                )}
+                {roleDistribution && (
+                    <div className="mt-10 bg-white bg-opacity-70 p-12 rounded-lg shadow-lg mx-auto text-center max-w-6xl w-full">
+                        <h2 className="text-2xl font-bold text-gray-900">Distribución de Roles</h2>
+                        <p className="mt-2 text-gray-900">Usuarios totales registrados: {roleDistribution.total_users}</p>
+                        <ul>
+                            {roleDistribution.roles.map(role => (
+                                <li key={role.role} className="mt-2 text-gray-900">
+                                    {role.role}: {role.count}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 )}
             </div>
         </div>
