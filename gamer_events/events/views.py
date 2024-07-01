@@ -21,7 +21,13 @@ class UserViewSet(ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            self.permission_classes = [IsAuthenticated]
+        else:
+            self.permission_classes = [IsAdminUser]
+        return super(UserViewSet, self).get_permissions()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

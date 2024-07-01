@@ -87,6 +87,8 @@ const TeamForm = ({ team, onTeamCreated }) => {
                             onChange={handleChange}
                             className="basic-multi-select bg-white text-black"
                             classNamePrefix="select"
+                            isSearchable={true}
+                            placeholder="Buscar usuarios por nombre..."
                         />
                     </div>
                     <div>

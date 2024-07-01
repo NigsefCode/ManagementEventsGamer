@@ -39,14 +39,14 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class EventSerializer(serializers.ModelSerializer):
+    creator_username = serializers.ReadOnlyField(source='creator.username')
+
     class Meta:
         model = Event
-        fields = '__all__'
+        fields = ['id', 'name', 'category', 'start_time', 'end_time', 'creator', 'creator_username', 'registration_deadline']
         read_only_fields = ['creator']  # Hacer que el campo creator sea de solo lectura
 
     def validate_creator(self, value):
-        # Este método puede ser utilizado para validar el campo creator si es necesario
-        # En este caso, no se necesita una validación específica, así que lo dejamos vacío
         return value
 
 class TeamSerializer(serializers.ModelSerializer):

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../Axios/Axios';
 import ParticipateForm from '../Participation/ParticipateForm';
+import EventDetails from './EventDetails';
 
 const EventList = () => {
     const [events, setEvents] = useState([]);
@@ -8,6 +9,8 @@ const EventList = () => {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [userParticipations, setUserParticipations] = useState([]);
+    const [showEventDetails, setShowEventDetails] = useState(false);
+    const [showParticipateForm, setShowParticipateForm] = useState(false);
 
     const fetchUserParticipations = async () => {
         try {
@@ -44,12 +47,21 @@ const EventList = () => {
         fetchCategories();
     }, [selectedCategory]);
 
+    const handleEventClick = (event) => {
+        setSelectedEvent(event);
+        setShowEventDetails(true);
+        setShowParticipateForm(false);
+    };
+
     const handleParticipationClick = (event) => {
         setSelectedEvent(event);
+        setShowEventDetails(false);
+        setShowParticipateForm(true);
     };
 
     const handleParticipationCreated = async () => {
         setSelectedEvent(null);
+        setShowParticipateForm(false);
         await fetchUserParticipations(); // Actualizar las participaciones del usuario después de crear una nueva
     };
 
@@ -77,11 +89,15 @@ const EventList = () => {
             </div>
             <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {events.map(event => (
-                    <li key={event.id} className="bg-purple-600 text-white p-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <li
+                        key={event.id}
+                        className="bg-purple-600 text-white p-4 rounded-lg shadow-md transition-transform transform hover:scale-105 cursor-pointer"
+                        onClick={() => handleEventClick(event)}
+                    >
                         <h3 className="text-xl font-semibold">{event.name}</h3>
+                        <p className="text-gray-300">{new Date(event.registration_deadline).toLocaleString()}</p>
                         <p className="text-gray-300">{event.category.name}</p>
                         <p className="text-gray-300">{new Date(event.start_time).toLocaleString()}</p>
-                        <p className="text-gray-300">{new Date(event.registration_deadline).toLocaleString()}</p>
                         {isUserParticipating(event.id) ? (
                             <button
                                 className="mt-2 bg-green-500 text-white font-bold py-2 px-4 rounded cursor-not-allowed"
@@ -91,7 +107,10 @@ const EventList = () => {
                             </button>
                         ) : (
                             <button
-                                onClick={() => handleParticipationClick(event)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleParticipationClick(event);
+                                }}
                                 className="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                             >
                                 Participar
@@ -100,7 +119,10 @@ const EventList = () => {
                     </li>
                 ))}
             </ul>
-            {selectedEvent && (
+            {showEventDetails && selectedEvent && (
+                <EventDetails event={selectedEvent} onClose={() => setShowEventDetails(false)} />
+            )}
+            {showParticipateForm && selectedEvent && (
                 <ParticipateForm
                     event={selectedEvent}
                     onParticipationCreated={handleParticipationCreated}
