@@ -20,7 +20,7 @@ const Navbar = () => {
     const handleLogout = () => {
         localStorage.clear();
         navigate('/login');
-        window.location.reload(); // Esto podría no ser necesario, dependiendo de cómo manejes la navegación y el estado
+        window.location.reload();
     };
 
     const toggleMobileMenu = () => {
